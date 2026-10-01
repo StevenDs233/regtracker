@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}RegTracker{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.css">
+  <style>
+    :root { --ink: #1d2b36; --grid: #e3e8ec; --line: #1f6f78; }
+    body { background: #f6f8f9; color: var(--ink); }
+    .app-bar { background: var(--ink); padding: 0.9rem 0; margin-bottom: 1.5rem; border-bottom: 4px solid var(--line); }
+    .app-bar a { color: #fff; font-weight: 700; font-size: 1.15rem; }
+    .app-bar .sub { color: #a9bac6; margin-left: 0.75rem; }
+    .notice-title a { color: var(--ink); font-weight: 600; }
+    .notice-title a:hover { color: var(--line); }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--line); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <div class="ui container">
+      <a href="{% url 'notice_list' %}">RegTracker</a><span class="sub">Utility regulatory notices across Canada</span>
+    </div>
+  </div>
+  <main class="ui container">
+    {% for message in messages %}<div class="ui positive message">{{ message }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

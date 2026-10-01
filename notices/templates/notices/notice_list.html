@@ -1,0 +1,76 @@
+{% extends "notices/base.html" %}
+{% block content %}
+<div class="ui stackable grid">
+  <div class="four wide column">
+    <form class="ui form" method="get">
+      <div class="field">
+        <label for="q">Search notices</label>
+        <input id="q" type="text" name="q" value="{{ filters.q }}" placeholder="Rate case, hearing, solar">
+      </div>
+      <div class="field">
+        <label for="source">Regulator</label>
+        <select id="source" name="source" class="ui dropdown">
+          <option value="">All regulators</option>
+          {% for s in sources %}<option value="{{ s.id }}" {% if filters.source == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="tag">Topic</label>
+        <select id="tag" name="tag" class="ui dropdown">
+          <option value="">All topics</option>
+          {% for t in tags %}<option value="{{ t }}" {% if filters.tag == t %}selected{% endif %}>{{ t|capfirst }}</option>{% endfor %}
+        </select>
+      </div>
+      <button class="ui primary button" type="submit">Apply filters</button>
+    </form>
+
+    <h4 class="ui header">Recent checks</h4>
+    <div class="ui relaxed list">
+      {% for run in recent_runs %}
+        <div class="item">
+          <i class="{% if run.status == 'success' %}green check{% elif run.status == 'failed' %}red exclamation triangle{% else %}grey sync{% endif %} icon"></i>
+          <div class="content">
+            <div class="header">{{ run.source.name }}</div>
+            <div class="description">{{ run.items_new }} new of {{ run.items_found }}, {{ run.started_at|timesince }} ago</div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="item">No checks yet. Run one from a regulator below.</div>
+      {% endfor %}
+    </div>
+
+    {% for s in sources %}
+      <form method="post" action="{% url 'scrape_now' s.id %}" style="margin-bottom:.5rem">{% csrf_token %}
+        <button class="ui basic small fluid button" type="submit">Check {{ s.name }} now</button>
+      </form>
+    {% endfor %}
+  </div>
+
+  <div class="twelve wide column">
+    <table class="ui very basic table">
+      <thead><tr><th>Notice</th><th>Regulator</th><th>Published</th></tr></thead>
+      <tbody>
+        {% for n in notices %}
+          <tr>
+            <td class="notice-title">
+              <a href="{{ n.url }}" target="_blank" rel="noopener">{{ n.title }}</a>
+              {% for t in n.tags %}<span class="ui mini basic label">{{ t }}</span>{% endfor %}
+            </td>
+            <td>{{ n.source.name }}</td>
+            <td>{{ n.published_on|default:"Not listed" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3">No notices match these filters. Clear the search or check a regulator for new notices.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if is_paginated %}
+      <div class="ui pagination menu">
+        {% if page_obj.has_previous %}<a class="item" href="?page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+        <span class="item">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a class="item" href="?page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
